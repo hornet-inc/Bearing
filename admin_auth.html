@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Blockchain Auth</title>
+  <link rel="stylesheet" href="css/admin_auth.css" />
+</head>
+<body>
+
+  <!-- Background Overlay -->
+  <div class="overlay"></div>
+
+  <!-- Auth Container -->
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <h1 class="glow-text">🔐 Blockchain Authentication</h1>
+      <p class="info-text">Please connect your MetaMask wallet to verify admin access.</p>
+      <button id="connectWalletBtn">Connect Wallet</button>
+      <p id="status"></p>
+    </div>
+  </div>
+
+  <!-- MetaMask + Script -->
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <script>
+    async function authenticateAdmin() {
+      const status = document.getElementById("status");
+
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const adminAddress = "0x05cb776ae36e8BC00C604e055dA539412AdB3cCD".toLowerCase(); // Replace with actual admin wallet
+
+          if (accounts[0].toLowerCase() === adminAddress) {
+            status.textContent = "✅ Verified! Redirecting to admin dashboard...";
+            status.style.color = "lime";
+            setTimeout(() => {
+              window.location.href = "admin.html";
+            }, 2000);
+          } else {
+            status.textContent = "🚫 Unauthorized wallet address!";
+            status.style.color = "red";
+          }
+        } catch (err) {
+          status.textContent = "⚠️ Wallet connection failed!";
+          status.style.color = "orange";
+        }
+      } else {
+        status.textContent = "🦊 MetaMask not detected!";
+        status.style.color = "red";
+      }
+    }
+
+    document.getElementById("connectWalletBtn").onclick = authenticateAdmin;
+  </script>
+</body>
+</html>

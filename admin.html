@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="css/admin.css" />
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+</head>
+<body>
+
+  <button class="logout-btn" id="logoutBtn">🔙 Logout</button>
+
+  <div id="logoutModal" class="logout-modal">
+    <div class="logout-modal-content">
+      <p>Are you sure you want to logout?</p>
+      <div class="logout-modal-actions">
+        <button id="confirmLogout">Yes, Logout</button>
+        <button id="cancelLogout">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>⚙️ M.I.R.A.I ⚙️</h1>
+    <p class="subtitle1">Machine Intelligence for motor Remaining Useful Life Alerts and Intervention</p>
+    <p class="subtitle">(Admin Dashboard : Full Access Control Panel)</p>
+  </div>
+
+  <div class="diagnostic-section">
+    <h2>📊 Live Motor Diagnostics</h2>
+    <div class="diagnostic-wrapper">
+      <div class="diagnostic-image">
+        <img id="diagnostic-img" src="assets/all_ok.png" />
+        <img id="img-fault-power" class="fault-img" src="assets/power_supply.png" />
+        <img id="img-fault-bushings" class="fault-img" src="assets/bushings.png" />
+        <img id="img-fault-armature" class="fault-img" src="assets/armature.png" />
+        <img id="img-fault-shell" class="fault-img" src="assets/shell.png" />
+        <img id="img-fault-front-bearing" class="fault-img" src="assets/front_bearing.png" />
+        <img id="img-fault-rear-bearing" class="fault-img" src="assets/rear_bearing.png" />
+        <img id="img-fault-load" class="fault-img" src="assets/load.png" />
+      </div>
+      <ul class="status-list">
+        <li id="status-power">✅ Power Supply OK</li>
+        <li id="status-bushings">✅ Bushings OK</li>
+        <li id="status-armature">✅ Armature OK</li>
+        <li id="status-shell">✅ Shell OK</li>
+        <li id="status-front-bearing">✅ Front Bearing OK</li>
+        <li id="status-rear-bearing">✅ Rear Bearing OK</li>
+        <li id="status-load">✅ Load OK</li>
+      </ul>
+
+      <!-- 💥 Error Terminal Block -->
+      <div class="error-terminal-section">
+        <h2>🧾 Error Diagnostics</h2>
+        <div id="error-terminal" class="error-terminal"></div>
+
+          <!-- Logs will be added here via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gauges-section">
+    <h2>📈 System Monitoring</h2>
+
+<div class="domain-section">
+  <h3>⚡ Power Supply</h3>
+  <button id="acControlBtn" class="ac-control-btn"> ⚙️ POWER CONTROL</button>
+  <div class="domain-grid" id="group-AC"></div>
+</div>
+
+<div id="acControlModal" class="modal">
+  <div class="modal-content ac-floating">
+    <span class="close-ac">&times;</span>
+    <h2>⚡AC Power Input⚡</h2>
+    <p id="acStatusText">RELAY: ⏳</p>
+    <button id="overrideBtn">🔁 MANUAL OVERRIDE</button>
+  </div>
+</div>
+
+    <div class="domain-section">
+      <h3>🌀 Motor Statistics</h3>
+      <div class="domain-grid" id="group-Motor"></div>
+    </div>
+
+    <div class="domain-section">
+      <h3>📡 RF System</h3>
+      <div class="domain-grid" id="group-RF"></div>
+    </div>
+
+    <div class="domain-section">
+      <h3>🔊 Acoustic Analysis</h3>
+      <div class="domain-grid" id="group-Accoustic"></div>
+    </div>
+
+    <div class="domain-section">
+      <h3>📐 Gyroscope</h3>
+      <div class="domain-grid" id="group-Gyro"></div>
+    </div>
+  </div>
+
+
+  <div class="controls-section">
+    <h2>🔌 Sub-system Controls</h2>
+    <div class="controls-grid">
+      <button class="esp-btn toggle-btn" id="fanBtn" data-target="control/fan">🌀 Fan: OFF</button>
+      <button class="esp-btn toggle-btn" id="ambientBtn" data-target="control/ambient">🌈 Ambient: OFF</button>
+      <button class="esp-btn toggle-btn" id="lightBtn" data-target="control/light">💡 Light: OFF</button>
+    </div>
+  </div>
+
+  <div class="specs-section">
+    <button id="specBtn">📘 View Motor Specs</button>
+  </div>
+
+  <div id="specModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Induction Motor Specifications</h2>
+      <div class="motor-spec-wrapper">
+        <img src="assets/motor_specs.webp" alt="Motor Image" class="motor-spec-image" />
+        <ul>
+          <li>Make: SIEMENS</li>
+          <li>Model: IEZ 3HP</li>
+          <li>Power: 3 HP</li>
+          <li>Voltage: 415V</li>
+          <li>Frequency: 50Hz</li>
+          <li>RPM: 1440</li>
+          <li>Type: Squirrel Cage</li>
+          <li>Poles: 4</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+<!-- === Floating Toggle Button === -->
+<button id="openMasterPanelBtn" class="floating-toggle">🎛️ MASTER CONTROL PANEL</button>
+
+<!-- === Master Control Panel === -->
+<div id="masterControlPanel" class="floating-panel" style="display: none;">
+  <div class="panel-header" id="masterPanelHeader">
+    <span>🧠 MASTER CONTROL PANEL</span>
+    <button id="closeMasterPanelBtn" class="close-panel">❌</button>
+  </div>
+
+  <!-- ✅ Scrollable Content Starts -->
+  <div class="panel-body">
+    <!-- RF Panel -->
+    <div class="panel-section">
+      <h3>
+        📡 RF Panel
+        <span id="rfLed" class="activity-led" style="display: none;"></span>
+      </h3>
+
+      <label>📶 Frequency (<span id="rfFreqUnit">Hz</span>)</label>
+      <div class="slider-row">
+        <input type="range" id="rfFrequencySlider" min="10" max="4000000000">
+        <input type="number" id="rfFrequencyInput">
+        <button id="rfFrequencySet">SET</button>
+        <button id="rfFrequencyReset">RESET</button>
+      </div>
+
+      <label>📈 Gain (<span>dB</span>)</label>
+      <div class="slider-row">
+        <input type="range" id="rfGainSlider" min="1" max="25">
+        <input type="number" id="rfGainInput">
+        <button id="rfGainSet">SET</button>
+        <button id="rfGainReset">RESET</button>
+      </div>
+
+      <div class="toggle-group" id="rfModeBtns">
+        <button id="rfSweepBtn">🔄 SWEEP</button>
+        <button id="rfStaticBtn">📍 STATIC</button>
+      </div>
+
+      <label>🧪 Mode:</label>
+      <select id="rfModeSelect">
+        <option value="manual">MANUAL</option>
+        <option value="auto">AUTO</option>
+      </select>
+
+      <div id="rfAutoFields" class="auto-fields" style="display: none;">
+        <input type="number" id="rfStartPos" placeholder="Start">
+        <input type="number" id="rfEndPos" placeholder="End">
+        <input type="number" id="rfDelay" placeholder="Delay (s)">
+        <input type="number" id="rfUnit" placeholder="Step">
+        <div class="button-group">
+          <button id="rfStartAuto">▶️ START</button>
+          <button id="rfStopAuto">⏹️ STOP</button>
+        </div>
+        <p id="rfAutoStatus" style="color: #0f0; margin-top: 5px;"></p>
+      </div>
+    </div>
+
+    <!-- Antenna Panel -->
+    <div class="panel-section">
+      <h3>
+        📡 Antenna Panel
+        <span id="antennaLed" class="activity-led" style="display: none;"></span>
+      </h3>
+
+      <label>📊 Strength (%)</label>
+      <div class="slider-row">
+        <input type="range" id="antennaSlider" min="0" max="100">
+        <input type="number" id="antennaStrengthValue" placeholder="0–100">
+      </div>
+
+      <div class="button-group">
+        <button id="antennaLow">LOW</button>
+        <button id="antennaMid">MID</button>
+        <button id="antennaHigh">HIGH</button>
+      </div>
+
+      <label>🧪 Mode:</label>
+      <select id="antennaModeSelect">
+        <option value="manual">MANUAL</option>
+        <option value="auto">AUTO</option>
+      </select>
+
+      <div id="antennaAutoFields" class="auto-fields" style="display: none;">
+        <input type="number" id="antennaStartPos" placeholder="Start">
+        <input type="number" id="antennaEndPos" placeholder="End">
+        <input type="number" id="antennaDelay" placeholder="Delay (s)">
+        <input type="number" id="antennaUnit" placeholder="Step">
+        <div class="button-group">
+          <button id="antennaStartAuto">▶️ START</button>
+          <button id="antennaStopAuto">⏹️ STOP</button>
+        </div>
+        <p id="antennaAutoStatus" style="color: #0f0; margin-top: 5px;"></p>
+      </div>
+    </div>
+
+    <!-- Data Log -->
+    <div class="panel-section">
+      <h3>📄 Data Log Panel</h3>
+      <div class="toggle-group">
+        <button id="logReadyBtn">✅ READY</button>
+        <button id="logBreakBtn">⛔ BREAK</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="panel-footer control-actions">
+      <button id="masterStartBtn">▶️ START</button>
+      <button id="masterStopBtn">🛑 STOP</button>
+    </div>
+  </div>
+  <!-- ✅ Scrollable Content Ends -->
+</div>
+
+<!-- === Drag & Toggle Script (only basic part, extended logic will be in JS) === -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const panel = document.getElementById("masterControlPanel");
+  const openBtn = document.getElementById("openMasterPanelBtn");
+  const closeBtn = document.getElementById("closeMasterPanelBtn");
+  const header = document.getElementById("masterPanelHeader");
+
+  openBtn.onclick = () => panel.style.display = "block";
+  closeBtn.onclick = () => panel.style.display = "none";
+
+  // Drag logic
+  let isDragging = false, offsetX = 0, offsetY = 0;
+  header.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    offsetX = e.clientX - panel.offsetLeft;
+    offsetY = e.clientY - panel.offsetTop;
+    document.body.style.userSelect = "none";
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (isDragging) {
+      panel.style.left = `${e.clientX - offsetX}px`;
+      panel.style.top = `${e.clientY - offsetY}px`;
+    }
+  });
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+    document.body.style.userSelect = "auto";
+  });
+
+  // Auto toggle visibility logic
+  document.getElementById("rfModeSelect").onchange = (e) => {
+    const isAuto = e.target.value === "auto";
+    document.getElementById("rfAutoFields").style.display = isAuto ? "block" : "none";
+    document.getElementById("rfFrequencySet").style.display = isAuto ? "none" : "inline-block";
+    document.getElementById("rfFrequencyReset").style.display = isAuto ? "none" : "inline-block";
+    document.getElementById("rfGainSet").style.display = isAuto ? "none" : "inline-block";
+    document.getElementById("rfGainReset").style.display = isAuto ? "none" : "inline-block";
+    document.getElementById("rfModeBtns").style.display = isAuto ? "none" : "flex";
+  };
+
+  document.getElementById("antennaModeSelect").onchange = (e) => {
+    document.getElementById("antennaAutoFields").style.display = e.target.value === "auto" ? "block" : "none";
+  };
+});
+</script>
+
+
+
+  <!-- Firebase + dashboard logic -->
+  <script src="js/admin.js" defer></script>
+</body>
+</html>

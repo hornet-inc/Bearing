@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="css/user.css" />
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* Logout Button */
+    .logout-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: rgba(255, 87, 34, 0.8);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: background-color 0.3s ease;
+      z-index: 1000;
+      border: none;
+      cursor: pointer;
+    }
+    .logout-btn:hover {
+      background-color: rgba(255, 61, 0, 1);
+    }
+
+    /* Modal Overlay */
+    .logout-modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(6px);
+      background-color: rgba(0, 0, 0, 0.3);
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Modal Content */
+    .logout-modal-content {
+      background-color: #2b2b2b;
+      padding: 30px;
+      border-radius: 12px;
+      color: white;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    /* Action Buttons */
+    .logout-modal-actions {
+      margin-top: 20px;
+    }
+    .logout-modal-actions button {
+      background-color: #ff3d00;
+      border: none;
+      color: white;
+      padding: 10px 18px;
+      margin: 0 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s ease;
+    }
+    .logout-modal-actions button:hover {
+      background-color: #dd2c00;
+    }
+    .logout-modal-actions #cancelLogout {
+      background-color: #9e9e9e;
+    }
+    .logout-modal-actions #cancelLogout:hover {
+      background-color: #757575;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Logout Button -->
+  <button class="logout-btn" id="logoutBtn">🔙 Logout</button>
+
+  <!-- Header -->
+  <div class="header">
+    <h1 class="title">⚙️ M.I.R.A.I ⚙️</h1>
+    <h2 class="subtitle">Machine Intelligence for motor RUL Alerts and Intervention</h2>
+    <p class="note">(USER Dashboard - Limited access only)</p>
+  </div>
+
+  <!-- Intro Section -->
+  <div class="intro-section">
+    <div class="intro-image">
+      <img src="assets/motor.png" alt="Induction Motor" />
+    </div>
+    <div class="intro-text">
+      <h2>System Overview</h2>
+      <p>
+        This smart monitoring dashboard displays real-time analytics of motor parameters using onboard integrated smart systems. Parameters like AC Power, Mechanical Faults, Bearing faults, and Motor Properties are analysed and displayed with smart alert system. Each module works independently to detect potential faults for predictive maintenance.
+      </p>
+    </div>
+  </div>
+
+  <!-- Quick Diagnostic Section -->
+<div class="diagnostic-section">
+  <h2 style="text-align: center; margin-bottom: 20px;">🔍 Quick Diagnostic</h2>
+  <div class="diagnostic-wrapper">
+    <div class="diagnostic-image">
+      <img id="diagnostic-img" src="assets/all_ok.png" alt="Diagnostic Overview" />
+      <img id="img-power" src="assets/power_supply.png" class="fault-overlay" style="display: none;" />
+      <img id="img-bushings" src="assets/bushings.png" class="fault-overlay" style="display: none;" />
+      <img id="img-armature" src="assets/armature.png" class="fault-overlay" style="display: none;" />
+      <img id="img-shell" src="assets/shell.png" class="fault-overlay" style="display: none;" />
+      <img id="img-front-bearing" src="assets/front_bearing.png" class="fault-overlay" style="display: none;" />
+      <img id="img-rear-bearing" src="assets/rear_bearing.png" class="fault-overlay" style="display: none;" />
+      <img id="img-load" src="assets/load.png" class="fault-overlay" style="display: none;" />
+    </div>
+      <div class="diagnostic-status">
+        <ul class="status-list">
+          <li id="status-power">✅ Power Supply OK</li>
+          <li id="status-bushings">✅ Bushings OK</li>
+          <li id="status-armature">✅ Armature OK</li>
+          <li id="status-shell">✅ Shell OK</li>
+          <li id="status-front-bearing">✅ Front Bearing OK</li>
+          <li id="status-rear-bearing">✅ Rear Bearing OK</li>
+          <li id="status-load">✅ Load OK</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Gauges -->
+  <div class="system-wrapper">
+    <!-- AC Power -->
+    <div class="system">
+      <h3>AC Power</h3>
+      <div class="gauges">
+        <div class="gauge-block"><canvas id="g1"></canvas></div>
+        <div class="gauge-block"><canvas id="g2"></canvas></div>
+        <div class="gauge-block"><canvas id="g3"></canvas></div>
+        <div class="gauge-block"><canvas id="g4"></canvas></div>
+        <div class="gauge-block"><canvas id="g5"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Acoustic -->
+    <div class="system">
+      <h3>Acoustic</h3>
+      <div class="gauges">
+        <div class="gauge-block"><canvas id="g6"></canvas></div>
+        <div class="gauge-block"><canvas id="g7"></canvas></div>
+        <div class="gauge-block"><canvas id="g8"></canvas></div>
+        <div class="gauge-block"><canvas id="g9"></canvas></div>
+        <div class="gauge-block"><canvas id="g10"></canvas></div>
+      </div>
+    </div>
+
+    <!-- RF -->
+    <div class="system">
+      <h3>RF</h3>
+      <div class="gauges">
+        <div class="gauge-block"><canvas id="g11"></canvas></div>
+        <div class="gauge-block"><canvas id="g12"></canvas></div>
+        <div class="gauge-block"><canvas id="g13"></canvas></div>
+        <div class="gauge-block"><canvas id="g14"></canvas></div>
+        <div class="gauge-block"><canvas id="g15"></canvas></div>
+      </div>
+    </div>
+
+    <!-- GYRO -->
+    <div class="system">
+      <h3>GYRO</h3>
+      <div class="gauges">
+        <div class="gauge-block"><canvas id="g26"></canvas></div>
+        <div class="gauge-block"><canvas id="g27"></canvas></div>
+        <div class="gauge-block"><canvas id="g28"></canvas></div>
+        <div class="gauge-block"><canvas id="g29"></canvas></div>
+        <div class="gauge-block"><canvas id="g30"></canvas></div>
+        <div class="gauge-block"><canvas id="g31"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Motor Properties -->
+    <div class="system long">
+      <h3>Motor Properties</h3>
+      <button id="specBtn">⚙️ View Motor Specs</button>
+      <div class="gauges">
+        <div class="gauge-block"><canvas id="g16"></canvas></div>
+        <div class="gauge-block"><canvas id="g17"></canvas></div>
+        <div class="gauge-block"><canvas id="g18"></canvas></div>
+        <div class="gauge-block"><canvas id="g19"></canvas></div>
+        <div class="gauge-block"><canvas id="g20"></canvas></div>
+        <div class="gauge-block"><canvas id="g21"></canvas></div>
+        <div class="gauge-block"><canvas id="g22"></canvas></div>
+        <div class="gauge-block"><canvas id="g23"></canvas></div>
+        <div class="gauge-block"><canvas id="g24"></canvas></div>
+        <div class="gauge-block"><canvas id="g25"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+<!-- Motor Specs Modal -->
+<div id="specModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Induction Motor Specifications</h2>
+    
+    <div class="motor-spec-wrapper">
+      <img src="assets/motor_specs.webp" alt="Motor Image" class="motor-spec-image" />
+      <ul>
+        <li>Make: SIEMENS</li>
+        <li>Model: IEZ 3HP</li>
+        <li>Power: 3 HP</li>
+        <li>Voltage: 415V</li>
+        <li>Frequency: 50Hz</li>
+        <li>RPM: 1440</li>
+        <li>Type: Squirrel Cage</li>
+        <li>Poles: 4</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" class="logout-modal">
+    <div class="logout-modal-content">
+      <p>Are you sure you want to logout?</p>
+      <div class="logout-modal-actions">
+        <button id="confirmLogout">Yes, Logout</button>
+        <button id="cancelLogout">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/user.js" defer></script>
+</body>
+</html>
