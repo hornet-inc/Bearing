@@ -1,0 +1,124 @@
+/* Base Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Background */
+body, html {
+  height: 100%;
+  font-family: 'Segoe UI', sans-serif;
+  background: url('../assets/back2.gif') no-repeat center center fixed;
+  background-size: cover;
+  overflow: hidden;
+}
+
+/* Overlay (Dark Tint) */
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 0;
+}
+
+/* Wrapper */
+.auth-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* Auth Card */
+.auth-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  padding: 45px 30px;
+  border-radius: 20px;
+  box-shadow: 0 0 35px rgba(0, 255, 255, 0.3);
+  width: 400px;
+  max-width: 90%;
+  text-align: center;
+  color: #000;
+  position: relative;
+}
+
+/* Neon Glow Border */
+.auth-card::before {
+  content: "";
+  position: absolute;
+  top: -2px; left: -2px;
+  right: -2px; bottom: -2px;
+  z-index: -1;
+  background: linear-gradient(45deg, #00ffe0, #0000ff, #00ffe0, #0000ff);
+  background-size: 400% 400%;
+  border-radius: 22px;
+  animation: borderGlow 6s ease infinite;
+  filter: blur(8px);
+}
+
+/* Header */
+.glow-text {
+  font-size: 28px;
+  font-weight: 600;
+  color: #000;
+  text-shadow: 0 0 15px #00ffe0, 0 0 25px #00ffe0;
+  margin-bottom: 20px;
+  animation: glow 2s infinite alternate;
+}
+
+/* Subtext */
+.info-text {
+  font-size: 16px;
+  color: #222;
+  margin-bottom: 25px;
+}
+
+/* Button */
+button {
+  width: 60%;
+  padding: 12px;
+  background: rgba(0, 255, 255, 0.5);
+  border: 2px solid #00ffe0;
+  color: #000;
+  font-size: 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #00ffe0;
+  color: #000;
+  box-shadow: 0 0 25px #00ffe0, 0 0 50px #00ffe0;
+}
+
+/* Status Message */
+#status {
+  margin-top: 18px;
+  font-size: 15px;
+  font-weight: 500;
+  text-shadow: 0 0 5px #aaa;
+}
+
+/* Animations */
+@keyframes glow {
+  from {
+    text-shadow: 0 0 15px #00ffe0;
+  }
+  to {
+    text-shadow: 0 0 35px #00ffe0, 0 0 65px #00ffe0;
+  }
+}
+
+@keyframes borderGlow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
