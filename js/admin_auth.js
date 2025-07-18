@@ -44,20 +44,33 @@ const contractABI = [
   }
 ];
 
+// ✅ Optional: fallback hardcoded admin addresses
+const hardcodedAdmins = [
+  "0x05cb776ae36e8bc00c604e055da539412adb3ccd",
+  "0x7afc9bc0e5994ebbdde82028f8bb690122d0ec69"
+];
+
 async function authenticateAdmin() {
   const status = document.getElementById("status");
 
   if (typeof window.ethereum !== "undefined") {
     try {
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      const userAddress = accounts[0];
+      const userAddress = accounts[0].toLowerCase();
 
+      // 🔗 Check via contract
       const web3 = new Web3(window.ethereum);
       const contract = new web3.eth.Contract(contractABI, contractAddress);
 
-      const isAdmin = await contract.methods.isAdmin(userAddress).call();
+      let isAdminOnChain = false;
+      try {
+        isAdminOnChain = await contract.methods.isAdmin(userAddress).call();
+      } catch (contractErr) {
+        console.warn("Contract call failed, fallback to hardcoded list.");
+      }
 
-      if (isAdmin) {
+      // ✅ Final check: contract OR hardcoded list
+      if (isAdminOnChain || hardcodedAdmins.includes(userAddress)) {
         status.textContent = "✅ Admin Verified! Redirecting...";
         status.style.color = "lime";
         setTimeout(() => {
@@ -67,6 +80,7 @@ async function authenticateAdmin() {
         status.textContent = "🚫 This wallet is not authorized as admin!";
         status.style.color = "red";
       }
+
     } catch (err) {
       console.error(err);
       status.textContent = "⚠️ Error during wallet authentication!";
